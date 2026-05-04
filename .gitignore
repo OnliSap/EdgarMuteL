@@ -15,9 +15,12 @@ env/
 ENV/
 .env
 
+# Configs
+settings.ini
+
 # PyInstaller
 build/
-*.spec  # раскомментируйте, если хотите игнорировать .spec файлы
+*.spec
 
 # Temporary files
 *.log
