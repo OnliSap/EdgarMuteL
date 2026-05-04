@@ -1,0 +1,26 @@
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.so
+*.dll
+venv/
+env/
+ENV/
+.env
+
+# PyInstaller
+build/
+*.spec  # раскомментируйте, если хотите игнорировать .spec файлы
+
+# Temporary files
+*.log
+*.tmp
+*.temp
+.DS_Store
