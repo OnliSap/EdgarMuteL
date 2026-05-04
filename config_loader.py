@@ -5,7 +5,7 @@ def get_config(filename="settings.ini"):
     config = configparser.ConfigParser()
     
     
-    default_settings = {
+    dark_theme = {
         'QComboBox': """
             background: #1e293b; 
             color: #f8fafc; 
@@ -60,7 +60,8 @@ def get_config(filename="settings.ini"):
 
     if not os.path.exists(filename):
         # Создаем одну секцию для стилей, чтобы не путаться
-        config['STYLES'] = default_settings
+        config['dark_theme'] = dark_theme
+        config['white_theme'] = white_theme
         with open(filename, 'w', encoding='utf-8') as configfile:
             config.write(configfile)
     else:

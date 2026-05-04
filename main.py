@@ -11,36 +11,39 @@ class MainWindow(QtWidgets.QWidget):
         self.bot_url = "http://127.0.0.1:5000"
         self.setWindowTitle("Admin Panel v4.0")
         self.setFixedSize(450, 750)
-        self.setStyleSheet("QWidget { background-color: #0f172a; }")
+        
+        self.style_type = "white_theme"  # ИЗМЕНИТЬ НА "white_theme" ДЛЯ СВЕТЛОГО СТИЛЯ
+        
+        self.setStyleSheet(f"QWidget {{ background-color: {config[self.style_type]['background']}; }}")
 
         layout = QtWidgets.QVBoxLayout(self)
         layout.setContentsMargins(35, 25, 35, 25)
         layout.setSpacing(10)
-
+        
         # ПОЛНОСТЬЮ ТЕМНЫЙ СТИЛЬ ДЛЯ СПИСКОВ
         dark_combo_style = f"""
             QComboBox {{ 
-                {config['STYLES']['QComboBox']} 
+                {config[self.style_type]['qcombobox']} 
             }}
             QComboBox::drop-down {{ 
                 border: 0px; 
             }}
             QComboBox::down-arrow {{ 
-                {config['STYLES']['QComboBox_downarrow']} 
+                {config[self.style_type]['qcombobox_downarrow']} 
             }}
             QComboBox QAbstractItemView {{
-                {config['STYLES']['QComboBox_menu']}
+                {config[self.style_type]['qcombobox_menu']}
             }}
         """
 
         self.header = QtWidgets.QLabel("STATUS: SYNCING...")
-        self.header.setStyleSheet("color: #6366f1; font-weight: bold; font-size: 14px; margin-bottom: 10px;")
+        self.header.setStyleSheet(f"color: {config[self.style_type]['header_color']}; font-weight: bold; font-size: 14px; margin-bottom: 10px;")
         self.header.setAlignment(QtCore.Qt.AlignCenter)
         layout.addWidget(self.header)
 
         def create_label(text):
             lbl = QtWidgets.QLabel(text)
-            lbl.setStyleSheet("color: #94a3b8; font-weight: bold; font-size: 12px; margin-top: 5px;")
+            lbl.setStyleSheet(f"color: {config[self.style_type]['label_color']}; font-weight: bold; font-size: 12px; margin-top: 5px;")
             return lbl
 
         layout.addWidget(create_label("ВЫБЕРИТЕ ЖЕРТВУ:"))
@@ -63,8 +66,7 @@ class MainWindow(QtWidgets.QWidget):
         layout.addWidget(create_label("ПРИЧИНА:"))
         self.reason_input = QtWidgets.QLineEdit()
         self.reason_input.setPlaceholderText("За что наказываем?")
-        self.reason_input.setStyleSheet(
-            "QLineEdit { background: #1e293b; color: white; padding: 12px; border-radius: 8px; border: 2px solid #334155; font-size: 14px; }")
+        self.reason_input.setStyleSheet(f"QLineEdit {{ {config[self.style_type]['qlineedit']} }}")
         layout.addWidget(self.reason_input)
 
         layout.addStretch()
