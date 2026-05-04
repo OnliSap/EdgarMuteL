@@ -57,14 +57,24 @@ def get_config(filename="settings.ini"):
         """
     }
 
+    user = {
+        'theme_index': 0
+    }
 
     if not os.path.exists(filename):
         # Создаем одну секцию для стилей, чтобы не путаться
         config['dark_theme'] = dark_theme
         config['white_theme'] = white_theme
+        config['user'] = user
         with open(filename, 'w', encoding='utf-8') as configfile:
             config.write(configfile)
     else:
         config.read(filename, encoding='utf-8')
     
     return config
+
+
+def theme_change(config, theme_index):
+    config['user']['theme_index'] = str(theme_index)
+    with open("settings.ini", 'w', encoding='utf-8') as configfile:
+        config.write(configfile)

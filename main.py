@@ -1,9 +1,10 @@
 import sys, requests
 from PySide6 import QtWidgets, QtCore
 from btn import DecoButton
-from config_loader import get_config
+from config_loader import get_config, theme_change
 
 config = get_config()
+themes = ["dark_theme", "white_theme"]
 
 class MainWindow(QtWidgets.QWidget):
     def __init__(self):
@@ -12,7 +13,9 @@ class MainWindow(QtWidgets.QWidget):
         self.setWindowTitle("Admin Panel v4.0")
         self.setFixedSize(450, 750)
         
-        self.style_type = "white_theme"  # ИЗМЕНИТЬ НА "white_theme" ДЛЯ СВЕТЛОГО СТИЛЯ
+        self.theme_index = int(config['user']['theme_index'])
+        self.style_type = themes[self.theme_index]
+        
         
         self.setStyleSheet(f"QWidget {{ background-color: {config[self.style_type]['background']}; }}")
 
@@ -74,7 +77,7 @@ class MainWindow(QtWidgets.QWidget):
         self.btn_sync = DecoButton("ОБНОВИТЬ СПИСОК", "#10b981", fsize=12)
         self.btn_exec = DecoButton("ИСПОЛНИТЬ ПРИГОВОР", "#ef4444")
         self.btn_exec.setFixedSize(380, 60)
-
+        
         layout.addWidget(self.btn_sync, alignment=QtCore.Qt.AlignCenter)
         layout.addWidget(self.btn_exec, alignment=QtCore.Qt.AlignCenter)
 
@@ -83,7 +86,12 @@ class MainWindow(QtWidgets.QWidget):
 
         self.user_data = {}
         QtCore.QTimer.singleShot(1000, self.fetch_users)
-
+        
+        theme_btn = DecoButton("СМЕНИТЬ ТЕМУ", "#64748b", fsize=8)
+        theme_btn.clicked.connect(self.change_theme_written)
+        layout.addWidget(theme_btn, alignment=QtCore.Qt.AlignRight)
+        
+        
     def fetch_users(self):
         try:
             r = requests.get(f"{self.bot_url}/get_users", timeout=2)
@@ -111,7 +119,12 @@ class MainWindow(QtWidgets.QWidget):
             QtCore.QTimer.singleShot(3000, lambda: self.header.setText("STATUS: ONLINE"))
         except:
             self.header.setText("SEND ERROR")
-
+            
+            
+    def change_theme_written(self):
+        self.theme_index = (self.theme_index + 1) % 2 # only black an white now
+        self.style_type = themes[self.theme_index]
+        theme_change(config, self.theme_index)
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
