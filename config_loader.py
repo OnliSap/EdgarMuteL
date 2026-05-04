@@ -31,6 +31,32 @@ def get_config(filename="settings.ini"):
         """
     }
     
+    white_theme = {
+        'QComboBox': """
+            background: #ffffff; 
+            color: #1e293b; 
+            padding: 8px; 
+            border-radius: 8px; 
+            border: 1px solid #cbd5e1; 
+            font-size: 14px;
+        """,
+        'QComboBox_downarrow': """
+            image: none; 
+            border-left: 5px solid transparent; 
+            border-right: 5px solid transparent; 
+            border-top: 5px solid #64748b; 
+            margin-right: 10px;
+        """,
+        'QComboBox_menu': """
+            background-color: #ffffff;
+            color: #1e293b;
+            selection-background-color: #3b82f6;
+            selection-color: white;
+            border: 1px solid #cbd5e1;
+            outline: 0px;
+        """
+    }
+
 
     if not os.path.exists(filename):
         # Создаем одну секцию для стилей, чтобы не путаться
