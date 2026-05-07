@@ -131,9 +131,10 @@ async def do_action(data):
         member = await guild.fetch_member(int(data['user_id']))
         action, reason, dur_str = data['action'], data['reason'], data['duration']
 
-        seconds = 60
         if "30 сек" in dur_str:
             seconds = 30
+        elif "1 мин" in dur_str:
+            seconds = 60            
         elif "5 мин" in dur_str:
             seconds = 300
         elif "30 мин" in dur_str:
@@ -142,6 +143,8 @@ async def do_action(data):
             seconds = 3600
         elif "24 часа" in dur_str:
             seconds = 86400
+        elif "Максимум(28 дней)" in dur_str:
+            seconds = 2419199
 
         until = discord.utils.utcnow() + datetime.timedelta(seconds=seconds)
 

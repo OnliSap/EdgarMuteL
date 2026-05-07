@@ -5,6 +5,8 @@ from config_loader import get_config, theme_change
 
 config = get_config()
 themes = ["dark_theme", "white_theme"]
+actions = ["Тайм-аут", "Откл. микрофон", "Откл. звук", "КИКНУТЬ", "ЗАБАНИТЬ"]
+times = ["30 сек", "1 мин", "5 мин", "30 мин", "1 час", "24 часа", "Максимум(28 дней)"]
 
 class MainWindow(QtWidgets.QWidget):
     def __init__(self):
@@ -29,11 +31,11 @@ class MainWindow(QtWidgets.QWidget):
         self.layout.addWidget(self.user_box)
 
         self.action_box = QtWidgets.QComboBox()
-        self.action_box.addItems(["Тайм-аут", "Откл. микрофон", "Откл. звук", "КИКНУТЬ", "ЗАБАНИТЬ"])
+        self.action_box.addItems(actions)
         self.layout.addWidget(self.action_box)
 
         self.time_box = QtWidgets.QComboBox()
-        self.time_box.addItems(["30 сек", "1 мин", "5 мин", "30 мин", "1 час", "24 часа", "Навсегда"])
+        self.time_box.addItems(times)
         self.layout.addWidget(self.time_box)
 
         self.reason_input = QtWidgets.QLineEdit()
@@ -53,7 +55,7 @@ class MainWindow(QtWidgets.QWidget):
 
         theme_btn = DecoButton("СМЕНИТЬ ТЕМУ", "#64748b", fsize=10)
         theme_btn.setFixedSize(190, 30)
-        theme_btn.clicked.connect(self.change_theme_written)
+        theme_btn.clicked.connect(self.change_theme)
         self.layout.addWidget(theme_btn, alignment=QtCore.Qt.AlignRight)
         
         self.user_data = {}
@@ -124,7 +126,7 @@ class MainWindow(QtWidgets.QWidget):
             if isinstance(widget, QtWidgets.QLabel) and widget != self.header:
                 widget.setStyleSheet(label_style)
             
-    def change_theme_written(self):
+    def change_theme(self):
         self.theme_index = (self.theme_index + 1) % 2
         self.style_type = themes[self.theme_index]
         theme_change(config, self.theme_index)
