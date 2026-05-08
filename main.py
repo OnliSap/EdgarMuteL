@@ -137,7 +137,3 @@ if __name__ == "__main__":
     window = MainWindow()
     window.show()
     sys.exit(app.exec())
-    
-    
-
-#хуй676714881109
