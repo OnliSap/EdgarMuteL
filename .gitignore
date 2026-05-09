@@ -17,6 +17,7 @@ ENV/
 
 # Configs
 settings.ini
+bot_settings.ini
 
 # PyInstaller
 build/
