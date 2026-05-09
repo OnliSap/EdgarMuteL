@@ -44,7 +44,7 @@ class MainWindow(QtWidgets.QWidget):
 
         self.layout.addStretch()
 
-        self.btn_sync = DecoButton("ОБНОВИТЬ СПИСОК", "#10b981", fsize=12)
+        self.btn_sync = DecoButton("Обновить список и статус бота", "#10b981", fsize=12)
         self.btn_exec = DecoButton("ИСПОЛНИТЬ ПРИГОВОР", "#ef4444")
         self.btn_exec.setFixedSize(380, 60)
         self.layout.addWidget(self.btn_sync, alignment=QtCore.Qt.AlignCenter)
@@ -59,6 +59,7 @@ class MainWindow(QtWidgets.QWidget):
         self.layout.addWidget(theme_btn, alignment=QtCore.Qt.AlignRight)
         
         self.user_data = {}
+        self.is_bot_online = False
         self.set_styles()
         QtCore.QTimer.singleShot(1000, self.fetch_users)
         
@@ -69,11 +70,23 @@ class MainWindow(QtWidgets.QWidget):
             self.user_data = r.json()
             self.user_box.clear()
             self.user_box.addItems(self.user_data.keys())
-            self.header.setText("STATUS: ONLINE")
-            self.header.setStyleSheet("color: #10b981; font-weight: bold;")
+            
+            if not self.is_bot_online:
+                self.header.setText("STATUS: ONLINE")
+                self.header.setStyleSheet("color: #10b981; font-weight: bold;")
+                self.is_bot_online = True
+            else:
+                self.header.setText("STATUS: ONLINE ✓")
+                self.header.setStyleSheet("color: #10b981; font-weight: bold;")
+                QtCore.QTimer.singleShot(1500, lambda: self.header.setText("STATUS: ONLINE"))
         except:
-            self.header.setText("STATUS: BOT OFFLINE")
-            self.header.setStyleSheet("color: #ef4444; font-weight: bold;")
+            if self.is_bot_online:
+                self.header.setText("STATUS: BOT OFFLINE")
+                self.header.setStyleSheet("color: #ef4444; font-weight: bold;")
+                self.is_bot_online = False
+            else:
+                self.header.setText("STATUS: BOT OFFLINE")
+                self.header.setStyleSheet("color: #ef4444; font-weight: bold;")
 
 
     def send_command(self):

@@ -241,7 +241,8 @@ class FirstStartupWindow(QtWidgets.QWidget):
         main_layout.addLayout(layout_token)
         main_layout.addLayout(layout_guild)
         main_layout.addLayout(layout_log_channel)
-        main_layout.addWidget(btn_save)
+        main_layout.addWidget(btn_save, 
+                              alignment=QtCore.Qt.AlignCenter)
 
         self.setLayout(main_layout)
 
