@@ -137,7 +137,5 @@ if __name__ == "__main__":
     window = MainWindow()
     window.show()
     sys.exit(app.exec())
-    
-    
 
-# БЛЯ Я НЕ ТО СДЕЛАЛ
+#мы мутанты из канализации
