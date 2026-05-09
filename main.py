@@ -1,7 +1,7 @@
 import sys, requests
 from PySide6 import QtWidgets, QtCore
 from btn import DecoButton
-from config_loader import get_config, theme_change
+from ini_parser import get_config, theme_change
 
 config = get_config()
 themes = ["dark_theme", "white_theme"]
@@ -137,5 +137,3 @@ if __name__ == "__main__":
     window = MainWindow()
     window.show()
     sys.exit(app.exec())
-
-#мы мутанты из канализации

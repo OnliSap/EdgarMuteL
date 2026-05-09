@@ -1,7 +1,24 @@
-import discord
+import discord, time, subprocess, sys, threading, asyncio, datetime, socket
 from discord.ext import commands
 from flask import Flask, request, render_template_string
-import threading, asyncio, datetime, socket
+from btn import DecoButton
+from ini_parser import get_bot_config
+from PySide6 import QtWidgets, QtCore
+
+
+def safe_int(value, default=0):
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return default
+
+
+botset = get_bot_config()
+
+TOKEN = botset['bot'].get('token', '').strip()
+GUILD_ID = safe_int(botset['bot'].get('guild_id', '0'))
+LOG_CHANNEL_ID = safe_int(botset['bot'].get('log_channel_id', '0'))
+first_startup = botset['bot'].getboolean('first_startup', fallback=True)
 
 intents = discord.Intents.default()
 intents.members = True
@@ -20,7 +37,6 @@ def get_local_ip():
         return ip
     except:
         return "127.0.0.1"
-
 
 
 HTML_TEMPLATE = """
@@ -55,7 +71,7 @@ HTML_TEMPLATE = """
         </select>
         <label>ВРЕМЯ:</label>
         <select id="time_box">
-            <option>30 сек</option><option>1 мин</option><option>5 мин</option><option>30 мин</option><option>1 час</option><option>24 часа</option>
+            <option>30 сек</option><option>1 мин</option><option>5 мин</option><option>30 мин</option><option>1 час</option><option>24 часа</option><option>Максимум(28 дней)</option>
         </select>
         <label>ПРИЧИНА:</label>
         <input type="text" id="reason_input" placeholder="Напиши за что...">
@@ -64,6 +80,10 @@ HTML_TEMPLATE = """
     <script>
         async function loadUsers() {
             const res = await fetch('/get_users');
+            if (!res.ok) {
+                document.getElementById('status').innerText = 'ОШИБКА ЗАГРУЗКИ';
+                return;
+            }
             const data = await res.json();
             const box = document.getElementById('user_box');
             box.innerHTML = '';
@@ -92,19 +112,23 @@ HTML_TEMPLATE = """
 
 
 @app.route('/')
-def index(): return render_template_string(HTML_TEMPLATE)
+def index():
+    return render_template_string(HTML_TEMPLATE)
 
 
 @app.route('/get_users', methods=['GET'])
 def get_users():
     guild = bot.get_guild(GUILD_ID)
-    if not guild: return {}, 404
+    if not guild:
+        return {}, 200
     return {m.display_name: str(m.id) for m in guild.members if not m.bot}, 200
 
 
 @app.route('/execute', methods=['POST'])
 def execute():
     data = request.json
+    if not data:
+        return "Bad Request", 400
     asyncio.run_coroutine_threadsafe(do_action(data), bot.loop)
     return "OK", 200
 
@@ -112,6 +136,8 @@ def execute():
 async def auto_unpunish(member_id, seconds, mode):
     await asyncio.sleep(seconds)
     guild = bot.get_guild(GUILD_ID)
+    if not guild:
+        return
     try:
         member = await guild.fetch_member(member_id)
         if mode == "mic":
@@ -119,22 +145,28 @@ async def auto_unpunish(member_id, seconds, mode):
         elif mode == "sound":
             await member.edit(deafen=False)
         log_channel = bot.get_channel(LOG_CHANNEL_ID)
-        if log_channel: await log_channel.send(f"✅ Срок наказания для {member.mention} истек.")
-    except:
+        if log_channel:
+            await log_channel.send(f"✅ Срок наказания для {member.mention} истек.")
+    except Exception:
         pass
 
 
 async def do_action(data):
     try:
         guild = bot.get_guild(GUILD_ID)
+        if not guild:
+            print("Ошибка: сервер не найден")
+            return
+
         log_channel = bot.get_channel(LOG_CHANNEL_ID)
         member = await guild.fetch_member(int(data['user_id']))
         action, reason, dur_str = data['action'], data['reason'], data['duration']
 
+        seconds = 60
         if "30 сек" in dur_str:
             seconds = 30
         elif "1 мин" in dur_str:
-            seconds = 60            
+            seconds = 60
         elif "5 мин" in dur_str:
             seconds = 300
         elif "30 мин" in dur_str:
@@ -146,10 +178,8 @@ async def do_action(data):
         elif "Максимум(28 дней)" in dur_str:
             seconds = 2419199
 
-        until = discord.utils.utcnow() + datetime.timedelta(seconds=seconds)
-
         if action == "Тайм-аут":
-            await member.timeout(until, reason=reason)
+            await member.timeout(discord.utils.utcnow() + datetime.timedelta(seconds=seconds), reason=reason)
         elif action == "Откл. микрофон":
             await member.edit(mute=True, reason=reason)
             asyncio.create_task(auto_unpunish(member.id, seconds, "mic"))
@@ -160,14 +190,84 @@ async def do_action(data):
             await member.kick(reason=reason)
         elif action == "ЗАБАНИТЬ":
             await member.ban(reason=reason)
+        else:
+            print(f"Ошибка: неизвестное действие {action}")
+            return
 
-        embed = discord.Embed(title="ПРИГОВОР ИСПОЛНЕН", color=0xef4444, timestamp=datetime.datetime.now())
-        embed.add_field(name="Нарушитель", value=member.mention)
-        embed.add_field(name="Мера", value=action)
-        embed.add_field(name="Причина", value=reason)
-        await log_channel.send(embed=embed)
+        if log_channel:
+            embed = discord.Embed(title="ПРИГОВОР ИСПОЛНЕН", color=0xef4444, timestamp=datetime.datetime.now())
+            embed.add_field(name="Нарушитель", value=member.mention)
+            embed.add_field(name="Мера", value=action)
+            embed.add_field(name="Причина", value=reason)
+            await log_channel.send(embed=embed)
     except Exception as e:
         print(f"Ошибка: {e}")
+
+
+class FirstStartupWindow(QtWidgets.QWidget):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Первый запуск бота")
+        self.setFixedSize(400, 260)
+        label = QtWidgets.QLabel("Похоже, что это первый запуск бота.\nПожалуйста, заполните данные и перезапустите программу.")
+        label.setAlignment(QtCore.Qt.AlignCenter)
+
+        layout_token = QtWidgets.QHBoxLayout()
+        token_getter = QtWidgets.QLineEdit()
+        token_line = QtWidgets.QLabel("Введите токен бота:")
+        token_getter.setPlaceholderText("тут последовательность какая-то")
+        layout_token.addWidget(token_line)
+        layout_token.addWidget(token_getter)
+
+        layout_guild = QtWidgets.QHBoxLayout()
+        guild_getter = QtWidgets.QLineEdit()
+        guild_line = QtWidgets.QLabel("Введите ID сервера:")
+        guild_getter.setPlaceholderText("тут число")
+        layout_guild.addWidget(guild_line)
+        layout_guild.addWidget(guild_getter)
+
+        layout_log_channel = QtWidgets.QHBoxLayout()
+        log_channel_getter = QtWidgets.QLineEdit()
+        log_channel_line = QtWidgets.QLabel("Введите ID канала для логов:")
+        log_channel_getter.setPlaceholderText("тут тоже число")
+        layout_log_channel.addWidget(log_channel_line)
+        layout_log_channel.addWidget(log_channel_getter)
+
+        btn_save = DecoButton("СОХРАНИТЬ", "#10b981")
+        btn_save.clicked.connect(lambda: self.get_data(token_getter.text(), guild_getter.text(), log_channel_getter.text()))
+
+        main_layout = QtWidgets.QVBoxLayout()
+        main_layout.addWidget(label)
+        main_layout.addLayout(layout_token)
+        main_layout.addLayout(layout_guild)
+        main_layout.addLayout(layout_log_channel)
+        main_layout.addWidget(btn_save)
+
+        self.setLayout(main_layout)
+
+    @QtCore.Slot()
+    def get_data(self, token, guild_id, log_channel_id):
+        token = token.strip()
+        guild_id = guild_id.strip()
+        log_channel_id = log_channel_id.strip()
+
+        if not token or not guild_id.isdigit() or not log_channel_id.isdigit():
+            QtWidgets.QMessageBox.warning(
+                self,
+                "Ошибка",
+                "Проверьте токен и числовые поля."
+            )
+            return
+
+        botset['bot']['token'] = token
+        botset['bot']['guild_id'] = guild_id
+        botset['bot']['log_channel_id'] = log_channel_id
+        botset['bot']['first_startup'] = "False"
+        with open("bot_settings.ini", 'w', encoding='utf-8') as configfile:
+            botset.write(configfile)
+
+        QtWidgets.QMessageBox.information(self, "Сохранено", "Данные сохранены! Пожалуйста, перезапустите программу.")
+        self.close()
 
 
 def run_flask():
@@ -179,6 +279,19 @@ def run_flask():
     app.run(host='0.0.0.0', port=5000, debug=False, use_reloader=False)
 
 
-if __name__ == "__main__":
+if __name__ == "__main__" and not first_startup:
+    if not TOKEN:
+        print("Bot token is not configured. Заполните bot_settings.ini.")
+        sys.exit(1)
+
+    time.sleep(3)
+    subprocess.Popen([sys.executable, "main.py"])
+
     threading.Thread(target=run_flask, daemon=True).start()
     bot.run(TOKEN)
+
+elif __name__ == "__main__" and first_startup:
+    app = QtWidgets.QApplication(sys.argv)
+    window = FirstStartupWindow()
+    window.show()
+    sys.exit(app.exec())
