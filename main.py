@@ -61,29 +61,51 @@ class MainWindow(QtWidgets.QWidget):
         self.user_data = {}
         self.is_bot_online = False
         self.set_styles()
-        QtCore.QTimer.singleShot(1000, self.fetch_users)
+
+        self.fetch_timer = QtCore.QTimer(self)
+        self.fetch_timer.timeout.connect(self.fetch_users)
+        self.fetch_timer.start(1000)
         
+        self.fetch_users()
         
     def fetch_users(self):
+        print("Fetching users...")
         try:
             r = requests.get(f"{self.bot_url}/get_users", timeout=2)
             self.user_data = r.json()
             self.user_box.clear()
             self.user_box.addItems(self.user_data.keys())
+            print(f"Got {len(self.user_data)} users")
             
-            if not self.is_bot_online:
-                self.header.setText("STATUS: ONLINE")
-                self.header.setStyleSheet("color: #10b981; font-weight: bold;")
-                self.is_bot_online = True
+            if len(self.user_data) > 0:
+                if not self.is_bot_online:
+                    self.header.setText("STATUS: ONLINE")
+                    self.header.setStyleSheet("color: #10b981; font-weight: bold;")
+                    self.is_bot_online = True
+                    self.fetch_timer.setInterval(30000)
+                    print("Switched to 30s interval")
+                else:
+                    self.header.setText("STATUS: ONLINE ✓")
+                    self.header.setStyleSheet("color: #10b981; font-weight: bold;")
+                    QtCore.QTimer.singleShot(1500, lambda: self.header.setText("STATUS: ONLINE"))
             else:
-                self.header.setText("STATUS: ONLINE ✓")
-                self.header.setStyleSheet("color: #10b981; font-weight: bold;")
-                QtCore.QTimer.singleShot(1500, lambda: self.header.setText("STATUS: ONLINE"))
-        except:
+                if self.is_bot_online:
+                    self.header.setText("STATUS: BOT OFFLINE")
+                    self.header.setStyleSheet("color: #ef4444; font-weight: bold;")
+                    self.is_bot_online = False
+                    self.fetch_timer.setInterval(1000)
+                    print("Switched back to 1s interval")
+                else:
+                    self.header.setText("STATUS: BOT OFFLINE")
+                    self.header.setStyleSheet("color: #ef4444; font-weight: bold;")
+        except Exception as e:
+            print(f"Failed to fetch: {e}")
             if self.is_bot_online:
                 self.header.setText("STATUS: BOT OFFLINE")
                 self.header.setStyleSheet("color: #ef4444; font-weight: bold;")
                 self.is_bot_online = False
+                self.fetch_timer.setInterval(1000)
+                print("Switched back to 1s interval")
             else:
                 self.header.setText("STATUS: BOT OFFLINE")
                 self.header.setStyleSheet("color: #ef4444; font-weight: bold;")

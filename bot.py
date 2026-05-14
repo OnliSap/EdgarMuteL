@@ -4,7 +4,8 @@ from flask import Flask, request, render_template_string
 from btn import DecoButton
 from ini_parser import get_bot_config
 from PySide6 import QtWidgets, QtCore
-
+from main import MainWindow
+window = MainWindow
 
 def safe_int(value, default=0):
     try:
@@ -285,12 +286,12 @@ if __name__ == "__main__" and not first_startup:
         print("Bot token is not configured. Заполните bot_settings.ini.")
         sys.exit(1)
 
-    time.sleep(3)
     subprocess.Popen([sys.executable, "main.py"])
 
     threading.Thread(target=run_flask, daemon=True).start()
+    
     bot.run(TOKEN)
-
+    
 elif __name__ == "__main__" and first_startup:
     app = QtWidgets.QApplication(sys.argv)
     window = FirstStartupWindow()
