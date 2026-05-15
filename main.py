@@ -12,7 +12,7 @@ class MainWindow(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
         self.bot_url = "http://127.0.0.1:5000"
-        self.setWindowTitle("Admin Panel v4.0")
+        self.setWindowTitle("Admin Panel v4.1")
         self.setFixedSize(450, 750)
         
         self.theme_index = int(config['user']['theme_index'])
