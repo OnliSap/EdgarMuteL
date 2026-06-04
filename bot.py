@@ -278,7 +278,7 @@ def run_flask():
     print(f"ПАНЕЛЬ УПРАВЛЕНИЯ ЗАПУЩЕНА!")
     print(f"Адрес для браузера в телефоне: http://{local_ip}:5000")
     print(f"=" * 40 + "\n")
-    app.run(host='0.0.0.0', port=5000, debug=False, use_reloader=False)
+    app.run(host='0.0.0.0', port=8000, debug=False, use_reloader=False)
 
 
 if __name__ == "__main__" and not first_startup:
