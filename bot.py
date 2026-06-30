@@ -1,4 +1,4 @@
-import discord, time, subprocess, sys, threading, asyncio, datetime, socket
+import discord, time, subprocess, sys, threading, asyncio, datetime, socket, os
 from discord.ext import commands
 from flask import Flask, request, render_template_string
 from btn import DecoButton
@@ -27,6 +27,13 @@ intents.voice_states = True
 
 bot = commands.Bot(command_prefix="!", intents=intents)
 app = Flask(__name__)
+
+
+def should_launch_gui():
+    if getattr(sys, "frozen", False):
+        return False
+    main_script = os.path.join(os.path.dirname(os.path.abspath(__file__)), "main.py")
+    return os.path.exists(main_script)
 
 
 def get_local_ip():
@@ -286,7 +293,9 @@ if __name__ == "__main__" and not first_startup:
         print("Bot token is not configured. Заполните bot_settings.ini.")
         sys.exit(1)
 
-    subprocess.Popen([sys.executable, "main.py"])
+    if should_launch_gui():
+        main_script = os.path.join(os.path.dirname(os.path.abspath(__file__)), "main.py")
+        subprocess.Popen([sys.executable, main_script], cwd=os.path.dirname(os.path.abspath(__file__)))
 
     threading.Thread(target=run_flask, daemon=True).start()
     
