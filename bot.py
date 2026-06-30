@@ -276,7 +276,7 @@ def run_flask():
     local_ip = get_local_ip()
     print(f"\n" + "=" * 40)
     print(f"ПАНЕЛЬ УПРАВЛЕНИЯ ЗАПУЩЕНА!")
-    print(f"Адрес для браузера в телефоне: http://{local_ip}:5000")
+    print(f"Адрес для браузера в телефоне: http://{local_ip}:8000")
     print(f"=" * 40 + "\n")
     app.run(host='0.0.0.0', port=8000, debug=False, use_reloader=False)
 
