@@ -34,8 +34,8 @@ The application runs three highly synchronized layers in parallel from a single 
 
 1. **Clone the Repository:**
    ```bash
-   git clone https://github.com
-   cd ai_cognitive_arch
+   git clone https://github.com/OnliSap/EdgarMuteL
+   cd EdgarMuteL
    ```
 
 2. **Initialize Your Virtual Environment & Dependencies:**
