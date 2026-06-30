@@ -183,10 +183,10 @@ async def do_action(data):
             await member.timeout(discord.utils.utcnow() + datetime.timedelta(seconds=seconds), reason=reason)
         elif action == "Откл. микрофон":
             await member.edit(mute=True, reason=reason)
-            asyncio.create_task(auto_unpunish(member.id, seconds, "mic"))
+            bot.loop.create_task(auto_unpunish(member.id, seconds, "mic"))
         elif action == "Откл. звук":
             await member.edit(deafen=True, reason=reason)
-            asyncio.create_task(auto_unpunish(member.id, seconds, "sound"))
+            bot.loop.create_task(auto_unpunish(member.id, seconds, "sound"))
         elif action == "КИКНУТЬ":
             await member.kick(reason=reason)
         elif action == "ЗАБАНИТЬ":

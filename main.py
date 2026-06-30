@@ -71,10 +71,22 @@ class MainWindow(QtWidgets.QWidget):
     def fetch_users(self):
         print("Fetching users...")
         try:
+            # 1. Запоминаем текущий выбранный ник перед очисткой списка
+            saved_user = self.user_box.currentText()
+            
             r = requests.get(f"{self.bot_url}/get_users", timeout=2)
             self.user_data = r.json()
+            
+            # 2. Обновляем элементы комбобокса
             self.user_box.clear()
             self.user_box.addItems(self.user_data.keys())
+            
+            # 3. Ищем сохраненный ник в новом списке и возвращаем выбор на него
+            if saved_user:
+                index = self.user_box.findText(saved_user)
+                if index >= 0:
+                    self.user_box.setCurrentIndex(index)
+                    
             print(f"Got {len(self.user_data)} users")
             
             if len(self.user_data) > 0:
