@@ -11,7 +11,7 @@ times = ["30 сек", "1 мин", "5 мин", "30 мин", "1 час", "24 ча�
 class MainWindow(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
-        self.bot_url = "http://127.0.0.1:5000"
+        self.bot_url = "http://127.0.0.1:8000"
         self.setWindowTitle("Admin Panel v4.1")
         self.setFixedSize(450, 750)
         
