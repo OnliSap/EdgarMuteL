@@ -1,7 +1,23 @@
 import os
 import configparser
+import sys
+
+
+def get_config_path(filename="settings.ini"):
+    if os.path.isabs(filename):
+        return filename
+
+    if getattr(sys, "frozen", False):
+        launcher_path = os.path.abspath(sys.argv[0])
+        base_dir = os.path.dirname(launcher_path)
+    else:
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+
+    return os.path.join(base_dir, filename)
+
 
 def get_config(filename="settings.ini"):
+    config_path = get_config_path(filename)
     config = configparser.ConfigParser()
     
     dark_theme = {
@@ -80,25 +96,30 @@ def get_config(filename="settings.ini"):
         'theme_index': '0'
     }
 
-    if not os.path.exists(filename):
+    os.makedirs(os.path.dirname(config_path), exist_ok=True)
+
+    if not os.path.exists(config_path):
         config['dark_theme'] = dark_theme
         config['white_theme'] = white_theme
         config['user'] = user
-        with open(filename, 'w', encoding='utf-8') as configfile:
+        with open(config_path, 'w', encoding='utf-8') as configfile:
             config.write(configfile)
     else:
-        config.read(filename, encoding='utf-8')
+        config.read(config_path, encoding='utf-8')
     
     return config
 
 
-def theme_change(config, theme_index):
+def theme_change(config, theme_index, filename="settings.ini"):
     config['user']['theme_index'] = str(theme_index)
-    with open("settings.ini", 'w', encoding='utf-8') as configfile:
+    config_path = get_config_path(filename)
+    os.makedirs(os.path.dirname(config_path), exist_ok=True)
+    with open(config_path, 'w', encoding='utf-8') as configfile:
         config.write(configfile)
         
 
 def get_bot_config(filename="bot_settings.ini"):
+    config_path = get_config_path(filename)
     config = configparser.ConfigParser()
 
     bot_config = {
@@ -108,10 +129,12 @@ def get_bot_config(filename="bot_settings.ini"):
         'first_startup': "True"
     }
     
-    if not os.path.exists(filename):
+    os.makedirs(os.path.dirname(config_path), exist_ok=True)
+
+    if not os.path.exists(config_path):
         config['bot'] = bot_config
-        with open(filename, 'w', encoding='utf-8') as configfile:
+        with open(config_path, 'w', encoding='utf-8') as configfile:
             config.write(configfile)
     else:
-        config.read(filename, encoding='utf-8')
+        config.read(config_path, encoding='utf-8')
     return config

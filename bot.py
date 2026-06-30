@@ -2,7 +2,7 @@ import discord, time, subprocess, sys, threading, asyncio, datetime, socket, os
 from discord.ext import commands
 from flask import Flask, request, render_template_string
 from btn import DecoButton
-from ini_parser import get_bot_config
+from ini_parser import get_bot_config, get_config_path
 from PySide6 import QtWidgets, QtCore
 from main import MainWindow
 window = MainWindow
@@ -272,7 +272,9 @@ class FirstStartupWindow(QtWidgets.QWidget):
         botset['bot']['guild_id'] = guild_id
         botset['bot']['log_channel_id'] = log_channel_id
         botset['bot']['first_startup'] = "False"
-        with open("bot_settings.ini", 'w', encoding='utf-8') as configfile:
+        config_path = get_config_path("bot_settings.ini")
+        os.makedirs(os.path.dirname(config_path), exist_ok=True)
+        with open(config_path, 'w', encoding='utf-8') as configfile:
             botset.write(configfile)
 
         QtWidgets.QMessageBox.information(self, "Сохранено", "Данные сохранены! Пожалуйста, перезапустите программу.")
