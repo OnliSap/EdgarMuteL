@@ -25,6 +25,7 @@ The application runs three highly synchronized layers in parallel from a single 
 ---
 
 ## 🚀 Installation & Local Deployment
+* MacOS users might need to allow the app to act in their device settings before launching it
 
 ### 📋 Prerequisites
 * Python 3.10+
