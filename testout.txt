@@ -1,9 +1,0 @@
-test_frozen_app_can_launch_gui_window (tests.test_gui_startup.GuiStartupTests.test_frozen_app_can_launch_gui_window) ... ok
-test_frozen_app_does_not_launch_gui_subprocess_when_lockfile_points_to_running_pid (tests.test_gui_startup.GuiStartupTests.test_frozen_app_does_not_launch_gui_subprocess_when_lockfile_points_to_running_pid) ... ok
-test_source_run_can_launch_gui_window (tests.test_gui_startup.GuiStartupTests.test_source_run_can_launch_gui_window) ... ok
-
-----------------------------------------------------------------------
-Ran 3 tests in 0.008s
-
-OK
-GUI already running, skipping duplicate launch
