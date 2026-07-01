@@ -36,6 +36,70 @@ def should_launch_gui():
     return os.path.exists(main_script)
 
 
+def get_gui_lock_path():
+    if getattr(sys, "frozen", False):
+        base_dir = os.path.dirname(os.path.abspath(sys.executable))
+    else:
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+    return os.path.join(base_dir, ".edgarmute_gui.lock")
+
+
+def is_gui_process_running(lock_path):
+    if not os.path.exists(lock_path):
+        return False
+
+    try:
+        with open(lock_path, "r", encoding="utf-8") as handle:
+            pid_text = handle.read().strip()
+        if not pid_text:
+            return False
+        pid = int(pid_text)
+        os.kill(pid, 0)
+        return True
+    except ProcessLookupError:
+        try:
+            os.remove(lock_path)
+        except OSError:
+            pass
+        return False
+    except (ValueError, PermissionError, OSError):
+        return False
+
+
+def launch_gui_subprocess(lock_path=None):
+    if lock_path is None:
+        lock_path = get_gui_lock_path()
+
+    if is_gui_process_running(lock_path):
+        print("GUI already running, skipping duplicate launch")
+        return False
+
+    if getattr(sys, "frozen", False):
+        try:
+            app = QtWidgets.QApplication.instance() or QtWidgets.QApplication(sys.argv)
+            window = MainWindow()
+            window.show()
+            with open(lock_path, "w", encoding="utf-8") as handle:
+                handle.write(str(os.getpid()))
+            return app
+        except Exception as exc:
+            print(f"Failed to launch GUI window: {exc}")
+            return False
+
+    main_script = os.path.join(os.path.dirname(os.path.abspath(__file__)), "main.py")
+    if not os.path.exists(main_script):
+        return False
+
+    try:
+        process = subprocess.Popen([sys.executable, main_script], cwd=os.path.dirname(os.path.abspath(__file__)))
+        with open(lock_path, "w", encoding="utf-8") as handle:
+            handle.write(str(process.pid))
+    except OSError:
+        return False
+
+    return True
+
+
 def get_local_ip():
     try:
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -296,8 +360,7 @@ if __name__ == "__main__" and not first_startup:
         sys.exit(1)
 
     if should_launch_gui():
-        main_script = os.path.join(os.path.dirname(os.path.abspath(__file__)), "main.py")
-        subprocess.Popen([sys.executable, main_script], cwd=os.path.dirname(os.path.abspath(__file__)))
+        launch_gui_subprocess()
 
     threading.Thread(target=run_flask, daemon=True).start()
     
