@@ -1,3 +1,4 @@
+import builtins
 import os
 import sys
 import tempfile
@@ -63,8 +64,9 @@ class GuiStartupTests(unittest.TestCase):
                     def __new__(cls, *args, **kwargs):
                         return object()
 
-                with patch("bot.QtWidgets.QApplication", DummyQApplication), patch("bot.MainWindow", side_effect=lambda: type("DummyWindow", (), {"show": lambda self: None})()):
-                    bot.launch_gui_subprocess(lock_path)
+                with patch("builtins.print"), patch("bot.QtWidgets.QApplication", DummyQApplication), patch("bot.MainWindow", side_effect=lambda: type("DummyWindow", (), {"show": lambda self: None})()):
+                    result = bot.launch_gui_subprocess(lock_path)
+                    self.assertFalse(result)
             finally:
                 sys.frozen = original_frozen
                 sys.executable = original_executable
