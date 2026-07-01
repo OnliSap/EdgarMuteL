@@ -359,6 +359,15 @@ if __name__ == "__main__" and not first_startup:
         print("Bot token is not configured. Заполните bot_settings.ini.")
         sys.exit(1)
 
+    if getattr(sys, "frozen", False):
+        threading.Thread(target=run_flask, daemon=True).start()
+        threading.Thread(target=lambda: bot.run(TOKEN), daemon=True).start()
+
+        app = QtWidgets.QApplication(sys.argv)
+        window = MainWindow()
+        window.show()
+        sys.exit(app.exec())
+
     if should_launch_gui():
         launch_gui_subprocess()
 
