@@ -23,6 +23,10 @@ bot_settings.ini
 # PyInstaller
 build/
 *.spec
+testout.txt
+my_icon.ico
+*.ps1
+.edgarmute_gui.lock
 
 # Temporary files
 *.log
