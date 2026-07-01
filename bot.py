@@ -31,7 +31,7 @@ app = Flask(__name__)
 
 def should_launch_gui():
     if getattr(sys, "frozen", False):
-        return False
+        return True
     main_script = os.path.join(os.path.dirname(os.path.abspath(__file__)), "main.py")
     return os.path.exists(main_script)
 
